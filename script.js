@@ -1,6 +1,6 @@
 // 🔑 Pexels API Key (FREE mein yahan se lein: https://www.pexels.com/api/)
 // Account banakar "Get API Key" par click karein aur niche apni key paste karein
-const API_KEY = "APNI_PEXELS_API_KEY_YAHAN_DALEIN";
+const API_KEY = "GAmVUNHmWkJeOsZxMuL63mL7yhkGU15azsDkjF9InmO5SRuyx4KJmRxj";
 const API_URL = "https://api.pexels.com/videos/popular?per_page=15&orientation=portrait";
 
 const videoFeed = document.getElementById('videoFeed');
