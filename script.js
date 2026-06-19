@@ -1,117 +1,183 @@
-// 🔑 Pexels API Key (FREE mein yahan se lein: https://www.pexels.com/api/)
-// Account banakar "Get API Key" par click karein aur niche apni key paste karein
-const API_KEY = "GAmVUNHmWkJeOsZxMuL63mL7yhkGU15azsDkjF9InmO5SRuyx4KJmRxj";
-const API_URL = "https://api.pexels.com/videos/popular?per_page=15&orientation=portrait";
+//  YouTube API Key (FREE - yahan se lein: https://console.cloud.google.com/)
+// Account banakar YouTube Data API v3 enable karein aur API key copy karein
+const YOUTUBE_API_KEY = 'APNI_YOUTUBE_API_KEY_YAHAN_DALEIN';
 
-const videoFeed = document.getElementById('videoFeed');
-const loader = document.getElementById('loader');
+// Hindi Drama Search Queries
+const dramaQueries = {
+  popular: 'Hindi dubbed drama serial full episode',
+  new: 'new Hindi web series 2024',
+  trending: 'trending Hindi drama',
+  dubbed: 'Korean drama Hindi dubbed'
+};
 
-// Videos Load Karne Ka Function
-async function loadVideos() {
-  try {
-    loader.style.display = 'block';
-    
-    const response = await fetch(API_URL, {
-      headers: {
-        'Authorization': API_KEY
-      }
-    });
+const dramaGrid = document.getElementById('dramaGrid');
+const searchInput = document.getElementById('searchInput');
+const tabs = document.querySelectorAll('.tab');
+const navItems = document.querySelectorAll('.nav-item');
+
+// Sample Drama Data (Fallback agar API na chale)
+const sampleDramas = [
+  {
+    title: 'Ek Raat Ki Baat Aur Double Shaadi',
+    subtitle: 'सभी का लाड़ला',
+    thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
+    videoId: 'dQw4w9WgXcQ',
+    views: '3.8M',
+    dubbed: true
+  },
+  {
+    title: 'Debt Bound to the Heir',
+    subtitle: 'Second Chance',
+    thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
+    videoId: 'dQw4w9WgXcQ',
+    views: '708.4K',
+    dubbed: false
+  },
+  {
+    title: 'Chhote Pati Ka Pagalpan',
+    subtitle: 'फकीर से रईस',
+    thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
+    videoId: 'dQw4w9WgXcQ',
+    views: '4.1M',
+    dubbed: true
+  }
+];
+
+// Load Dramas
+async function loadDramas(category = 'popular') {
+  dramaGrid.innerHTML = '<p style="text-align:center; padding:50px;">Loading...</p>';
+  
+  try {    const query = dramaQueries[category];
+    const response = await fetch(
+      `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=12&q=${encodeURIComponent(query)}&type=video&key=${YOUTUBE_API_KEY}`
+    );
     
     const data = await response.json();
     
-    // Loader hide karo
-    loader.style.display = 'none';
-    
-    // Videos render karo
-    renderVideos(data.videos);
-    
+    if (data.items) {
+      renderDramas(data.items);
+    } else {
+      renderDramas(sampleDramas);
+    }
   } catch (error) {
     console.error('Error:', error);
-    loader.innerHTML = '<p style="color:#ff4444;">⚠️ Error loading videos. Check API Key!</p>';
+    renderDramas(sampleDramas);
   }
 }
 
-// Videos Display Karne Ka Function
-function renderVideos(videos) {
-  videoFeed.innerHTML = ''; // Purane videos hatao
+// Render Drama Cards
+function renderDramas(videos) {
+  dramaGrid.innerHTML = '';
   
-  videos.forEach((video, index) => {
-    // HD quality video link dhundo
-    const hdFile = video.video_files.find(f => f.quality === 'hd' && f.file_type === 'video/mp4') 
-                || video.video_files[0];
+  videos.forEach(video => {
+    const videoId = video.id?.videoId || video.videoId;
+    const thumbnail = video.snippet?.thumbnails?.high?.url || video.thumbnail;
+    const title = video.snippet?.title || video.title;
+    const views = Math.floor(Math.random() * 5) + 1 + 'M';
+    const isDubbed = title.toLowerCase().includes('hindi') || title.toLowerCase().includes('dubbed');
     
-    const videoCard = document.createElement('div');
-    videoCard.className = 'video-card';
+    const card = document.createElement('div');
+    card.className = 'drama-card';
+    card.onclick = () => playVideo(videoId);
     
-    videoCard.innerHTML = `
-      <video 
-        src="${hdFile.link}" 
-        poster="${video.image}" 
-        loop         muted 
-        playsinline
-        preload="metadata">
-      </video>
-      
-      <div class="video-info">
-        <div class="video-title">Drama Episode ${index + 1}</div>
-        <div class="video-creator">🎭 ${video.user.name}</div>
+    card.innerHTML = `
+      <div class="drama-poster">
+        <img src="${thumbnail}" alt="${title}">
+        ${isDubbed ? '<span class="dubbed-badge">Dubbed</span>' : ''}
+        <span class="view-count">🔥 ${views}</span>
       </div>
-      
-      <div class="video-actions">
-        <button class="action-btn" onclick="toggleLike(this)">❤️</button>
-        <button class="action-btn" onclick="shareVideo('${hdFile.link}')">📤</button>
-        <button class="action-btn" onclick="toggleMute(this)">🔇</button>
-      </div>
+      <div class="drama-title">${title}</div>
+      <div class="drama-subtitle">${video.snippet?.channelTitle || 'Hindi Drama'}</div>
     `;
     
-    videoFeed.appendChild(videoCard);
+    dramaGrid.appendChild(card);
   });
-  
-  // Auto-play setup
-  setupAutoPlay();
 }
 
-// Auto-Play Jab Video Screen Par Aaye
-function setupAutoPlay() {
-  const videos = document.querySelectorAll('.video-card video');
-  
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      const video = entry.target;
-      if (entry.isIntersecting) {
-        video.play().catch(e => console.log('Auto-play blocked'));
-      } else {
-        video.pause();
-        video.currentTime = 0;
-      }
-    });
-  }, { threshold: 0.7 });
-  
-  videos.forEach(video => observer.observe(video));
+// Play Video
+function playVideo(videoId) {
+  const modal = document.getElementById('videoModal');  const player = document.getElementById('videoPlayer');
+  player.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+  modal.classList.add('active');
 }
 
-// Like Button Toggle
-function toggleLike(btn) {
-  btn.style.background = btn.style.background ? '' : '#ff006e';
+// Close Video
+function closeVideo() {
+  const modal = document.getElementById('videoModal');
+  const player = document.getElementById('videoPlayer');
+  player.src = '';
+  modal.classList.remove('active');
 }
 
-// Share Video
-function shareVideo(url) {  if (navigator.share) {
-    navigator.share({
-      title: 'Check out this drama!',
-      url: url
-    });
-  } else {
-    alert('Video Link: ' + url);
+// Tab Click
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    loadDramas(tab.dataset.category);
+  });
+});
+
+// Nav Click
+navItems.forEach(item => {
+  item.addEventListener('click', () => {
+    navItems.forEach(n => n.classList.remove('active'));
+    item.classList.add('active');
+    showPage(item.dataset.page);
+  });
+});
+
+// Show Page
+function showPage(page) {
+  closeMenu();
+  if (page === 'home') {
+    loadDramas('popular');
+  } else if (page === 'mylist') {
+    dramaGrid.innerHTML = '<p style="text-align:center; padding:50px;">My List - Coming Soon!</p>';
+  } else if (page === 'profile') {
+    dramaGrid.innerHTML = '<p style="text-align:center; padding:50px;">Profile - Coming Soon!</p>';
   }
 }
 
-// Mute/Unmute
-function toggleMute(btn) {
-  const video = btn.closest('.video-card').querySelector('video');
-  video.muted = !video.muted;
-  btn.textContent = video.muted ? '🔇' : '🔊';
+// Settings
+function showSettings() {
+  document.getElementById('settingsPanel').classList.add('active');
+  closeMenu();
 }
 
-// Page Load Hote Hi Videos Fetch Karo
-window.addEventListener('load', loadVideos);
+function closeSettings() {  document.getElementById('settingsPanel').classList.remove('active');
+}
+
+// Menu
+function openMenu() {
+  document.getElementById('menuOverlay').classList.add('active');
+}
+
+function closeMenu() {
+  document.getElementById('menuOverlay').classList.remove('active');
+}
+
+// Search
+searchInput.addEventListener('input', (e) => {
+  const query = e.target.value;
+  if (query.length > 2) {
+    searchDramas(query);
+  }
+});
+
+async function searchDramas(query) {
+  try {
+    const response = await fetch(
+      `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=12&q=${encodeURIComponent(query)}&type=video&key=${YOUTUBE_API_KEY}`
+    );
+    const data = await response.json();
+    if (data.items) {
+      renderDramas(data.items);
+    }
+  } catch (error) {
+    console.error('Search error:', error);
+  }
+}
+
+// Initial Load
+loadDramas('popular');
