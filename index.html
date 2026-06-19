@@ -1,34 +1,100 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>MyShortDrama - Free Reels</title>
+  <title>DramaBox - Hindi Serials</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
   
-  <div class="app-container">
+  <!-- Main App -->
+  <div class="app">
     
     <!-- Header -->
-    <header class="app-header">
-      <h1>🎬 MyShortDrama</h1>
-      <button class="refresh-btn" onclick="loadVideos()">↻</button>
+    <header class="header">
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Search dramas...">
+      </div>
     </header>
 
-    <!-- Video Feed Container -->
-    <div class="video-feed" id="videoFeed">
-      <!-- Videos yahan JavaScript se aayengi -->
-      <div class="loader" id="loader">
-        <div class="spinner"></div>
-        <p>Loading Dramas...</p>
+    <!-- Category Tabs -->
+    <div class="category-tabs">
+      <button class="tab active" data-category="popular">Popular</button>
+      <button class="tab" data-category="new">New</button>
+      <button class="tab" data-category="trending">Trending</button>
+      <button class="tab" data-category="dubbed">Dubbed</button>
+    </div>
+
+    <!-- Drama Grid -->
+    <div class="drama-grid" id="dramaGrid">
+      <!-- Dramas yahan aayenge -->
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-page="home">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Home</span>
+      </button>
+      <button class="nav-item" data-page="foryou">
+        <span class="nav-icon">▶️</span>
+        <span class="nav-label">For You</span>
+      </button>
+      <button class="nav-item" data-page="mylist">
+        <span class="nav-icon"></span>
+        <span class="nav-label">My List</span>
+      </button>
+      <button class="nav-item" data-page="profile">        <span class="nav-icon">👤</span>
+        <span class="nav-label">Profile</span>
+      </button>
+    </nav>
+
+    <!-- Menu Overlay -->
+    <div class="menu-overlay" id="menuOverlay">
+      <div class="menu-content">
+        <h2>Menu</h2>
+        <button class="menu-item" onclick="showPage('home')">🏠 Home</button>
+        <button class="menu-item" onclick="showPage('mylist')">📚 My List</button>
+        <button class="menu-item" onclick="showPage('profile')">👤 Profile</button>
+        <button class="menu-item" onclick="showSettings()">⚙️ Settings</button>
+        <button class="menu-item" onclick="closeMenu()">❌ Close</button>
       </div>
+    </div>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel" id="settingsPanel">
+      <h2>️ Settings</h2>
+      <div class="setting-item">
+        <label>Auto Play</label>
+        <input type="checkbox" id="autoPlayToggle" checked>
+      </div>
+      <div class="setting-item">
+        <label>Video Quality</label>
+        <select id="qualitySelect">
+          <option value="hd">HD</option>
+          <option value="sd">SD</option>
+        </select>
+      </div>
+      <div class="setting-item">
+        <label>Language</label>
+        <select id="languageSelect">
+          <option value="hindi">Hindi</option>
+          <option value="english">English</option>
+        </select>
+      </div>
+      <button class="close-settings" onclick="closeSettings()">Close</button>
+    </div>
+
+    <!-- Video Player Modal -->
+    <div class="video-modal" id="videoModal">
+      <button class="close-modal" onclick="closeVideo()">✕</button>
+      <iframe id="videoPlayer" src="" frameborder="0" allowfullscreen></iframe>
     </div>
 
   </div>
 
-  <script src="script.js"></script>
-</body>
+  <script src="script.js"></script></body>
 </html>
